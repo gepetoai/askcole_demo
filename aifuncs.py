@@ -57,6 +57,26 @@ def initialize_vdb(foldername):
     print(f'{foldername} db initialized')
     return db
 
+def initialize_vdb(foldername):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # Construct the path to the .txt file, in this case, the book Meditations by Marcus Aurelius
+    #txt_file_path = os.path.join(dir_path, 'meditations.txt')
+
+    loader = DirectoryLoader(f'rag_docs/{foldername}')
+    documents = loader.load()
+    
+    text_splitter = SemanticChunker(OpenAIEmbeddings())
+    #text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50, length_function = len, is_separator_regex = False)
+    docs = text_splitter.split_documents(documents)
+    
+    #probably need to do retries here too
+    embeddings = OpenAIEmbeddings()
+
+    db = FAISS.from_documents(docs, embeddings)
+    print(f'{foldername} db initialized')
+    return db
+
 def find_examples(db, query, k=5):
     docs = db.similarity_search(query, k=k)
 
